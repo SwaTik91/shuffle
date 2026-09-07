@@ -8,6 +8,7 @@ import {
   totalBet,
 } from "./engine.js";
 import {
+  animateReelSpin,
   bindChrome,
   paytableHtml,
   renderReels,
@@ -68,11 +69,7 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
   }
 
   async function animateLand(grid) {
-    const frames = 8;
-    for (let i = 0; i < frames; i += 1) {
-      renderReels(reelsEl, randomGrid(rng));
-      await delay(70 + i * 15);
-    }
+    await animateReelSpin(reelsEl, state.lastGrid, grid, rng);
     state.lastGrid = grid;
     renderReels(reelsEl, grid);
   }

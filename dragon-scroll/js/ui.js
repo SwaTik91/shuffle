@@ -5,21 +5,95 @@ export function symbolTile(id, extraClass = "") {
   return `<div class="symbol symbol-${id} ${extraClass}" data-symbol="${id}"><img src="${meta.image}" alt="${meta.name}"></div>`;
 }
 
+export function buildSpinStrip(fromCol, toCol, extraCount, pick) {
+  const filler = Array.from({ length: extraCount }, pick);
+  return [...fromCol, ...filler, ...toCol];
+}
+
+function ensureReels(root) {
+  if (root.querySelectorAll("[data-reel]").length === 5) return;
+  root.innerHTML = [0, 1, 2, 3, 4]
+    .map(
+      (index) =>
+        `<div class="reel" data-reel="${index}"><div class="reel-window"><div class="reel-strip"></div></div></div>`
+    )
+    .join("");
+}
+
+function stripEl(root, reelIndex) {
+  return root.querySelector(`[data-reel="${reelIndex}"] .reel-strip`);
+}
+
 export function renderReels(root, grid, highlights = []) {
+  ensureReels(root);
   const lit = new Set(
     highlights.flatMap((win) => win.path.map((row, reel) => `${reel}-${row}`))
   );
-  root.innerHTML = grid
-    .map((reel, reelIndex) => {
-      const cells = reel
-        .map((id, row) => {
-          const on = lit.has(`${reelIndex}-${row}`) ? "is-win" : "";
-          return symbolTile(id, on);
-        })
-        .join("");
-      return `<div class="reel">${cells}</div>`;
+  grid.forEach((col, reelIndex) => {
+    const strip = stripEl(root, reelIndex);
+    strip.style.transition = "none";
+    strip.style.transform = "translate3d(0, 0, 0)";
+    strip.innerHTML = col
+      .map((id, row) => symbolTile(id, lit.has(`${reelIndex}-${row}`) ? "is-win" : ""))
+      .join("");
+  });
+}
+
+function cellSize(root) {
+  const windowEl = root.querySelector(".reel-window");
+  const width = windowEl.getBoundingClientRect().width;
+  return width * (4 / 3);
+}
+
+export function animateReelSpin(root, fromGrid, toGrid, rng) {
+  ensureReels(root);
+  const height = cellSize(root) || 96;
+  const pick = () => SYMBOLS[Math.floor(rng() * SYMBOLS.length)];
+
+  return Promise.all(
+    toGrid.map((finalCol, reelIndex) => {
+      const extra = 16 + reelIndex * 7;
+      const sequence = buildSpinStrip(fromGrid[reelIndex], finalCol, extra, pick);
+      const reel = root.querySelector(`[data-reel="${reelIndex}"]`);
+      const strip = stripEl(root, reelIndex);
+      strip.innerHTML = sequence.map((id) => symbolTile(id)).join("");
+      strip.style.transition = "none";
+      strip.style.transform = "translate3d(0, 0, 0)";
+      reel.classList.add("is-spinning");
+
+      const distance = (sequence.length - 3) * height;
+      const duration = 820 + reelIndex * 260;
+
+      return new Promise((resolve) => {
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          reel.classList.remove("is-spinning");
+          strip.style.transition = "none";
+          strip.innerHTML = finalCol.map((id) => symbolTile(id)).join("");
+          strip.style.transform = "translate3d(0, 0, 0)";
+          resolve();
+        };
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            strip.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.7, 0.16, 1)`;
+            strip.style.transform = `translate3d(0, ${-distance}px, 0)`;
+          });
+        });
+
+        strip.addEventListener(
+          "transitionend",
+          (event) => {
+            if (event.propertyName === "transform") finish();
+          },
+          { once: true }
+        );
+        window.setTimeout(finish, duration + 120);
+      });
     })
-    .join("");
+  );
 }
 
 export function bindChrome(doc) {

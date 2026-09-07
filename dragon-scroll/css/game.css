@@ -105,14 +105,32 @@ body {
 }
 
 .reel {
-  display: grid;
-  gap: 6px;
+  min-width: 0;
+}
+
+.reel-window {
+  overflow: hidden;
+  aspect-ratio: 1 / 4;
+  border: 1px solid #6d3a2c;
+  background: #1b0b0d;
+  mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent);
+}
+
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.reel.is-spinning .reel-strip {
+  filter: blur(1.2px);
 }
 
 .symbol {
   aspect-ratio: 3 / 4;
+  width: 100%;
+  flex: 0 0 auto;
   overflow: hidden;
-  border: 1px solid #6d3a2c;
   background: #1b0b0d;
 }
 

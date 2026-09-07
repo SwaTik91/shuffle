@@ -12,6 +12,7 @@ import {
   totalBet,
 } from "../js/engine.js";
 import { LINES, START_BALANCE } from "../js/config.js";
+import { buildSpinStrip } from "../js/ui.js";
 
 const dragonLine = () => [
   ["jack", "dragon", "queen"],
@@ -134,6 +135,20 @@ test("pickExpandingSymbol never returns scroll", () => {
   }
   assert.equal(seen.has("scroll"), false);
   assert.equal(seen.size, 9);
+});
+
+test("spin strip starts on current symbols and ends on the result", () => {
+  const from = ["dragon", "ace", "jack"];
+  const to = ["scroll", "lion", "coin"];
+  let n = 0;
+  const strip = buildSpinStrip(from, to, 4, () => {
+    n += 1;
+    return "phoenix";
+  });
+  assert.deepEqual(strip.slice(0, 3), from);
+  assert.deepEqual(strip.slice(-3), to);
+  assert.equal(strip.length, 10);
+  assert.equal(n, 4);
 });
 
 test("spinReels returns a 5x3 grid from strips", () => {
