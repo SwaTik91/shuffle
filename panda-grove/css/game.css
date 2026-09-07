@@ -55,9 +55,15 @@ body {
   border-radius: 8px;
 }
 
+.game-title {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.7rem;
+  color: #2a3d28;
+}
+
 .eyebrow,
-.feature,
-.sister {
+.feature {
   margin: 0;
   color: var(--muted);
   letter-spacing: 0.08em;
@@ -69,8 +75,8 @@ body {
   display: inline-block;
   margin-top: 8px;
   color: #c45c1a;
-  text-decoration: none;
-  font-weight: 700;
+  text-decoration: underline;
+  font-size: 0.85rem;
 }
 
 .feature {

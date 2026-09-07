@@ -67,7 +67,9 @@ body {
   display: inline-block;
   margin-top: 8px;
   color: var(--win);
-  text-decoration: none;
+  text-decoration: underline;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .feature {

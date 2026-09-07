@@ -115,7 +115,7 @@ export const SYMBOL_META = {
 export const COPY = {
   title: "Свиток Дракона",
   subtitle: "Песочница · фейковые кредиты",
-  sister: "Роща Панды",
+  sister: "Другая игра: Роща Панды",
   sisterHref: "../panda-grove/",
   balance: "Баланс",
   totalBet: "Ставка",
