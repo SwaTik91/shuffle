@@ -12,7 +12,7 @@ import {
   totalBet,
 } from "../js/engine.js";
 import { LINES, START_BALANCE } from "../js/config.js";
-import { buildSpinStrip } from "../js/ui.js";
+import { buildSpinStrip, lineCenters, litCells, polylineFromCenters } from "../js/ui.js";
 
 const dragonLine = () => [
   ["jack", "dragon", "queen"],
@@ -91,6 +91,7 @@ test("AE4: expanding dragon on reels 1/3/5 pays 3-kind on every active line", ()
   assert.deepEqual(result.grid[2], ["dragon", "dragon", "dragon"]);
   assert.deepEqual(result.grid[4], ["dragon", "dragon", "dragon"]);
   assert.equal(result.expandWin.count, 3);
+  assert.deepEqual(result.expandWin.reels, [0, 2, 4]);
   assert.equal(result.expandWin.amount, 100 * 10);
   assert.equal(result.lineWins.some((win) => win.symbol === "dragon"), false);
 });
@@ -137,7 +138,7 @@ test("pickExpandingSymbol never returns scroll", () => {
   assert.equal(seen.size, 9);
 });
 
-test("spin strip starts on current symbols and ends on the result", () => {
+test("spin strip puts the result above the current view so the reel can fall down", () => {
   const from = ["dragon", "ace", "jack"];
   const to = ["scroll", "lion", "coin"];
   let n = 0;
@@ -145,10 +146,37 @@ test("spin strip starts on current symbols and ends on the result", () => {
     n += 1;
     return "phoenix";
   });
-  assert.deepEqual(strip.slice(0, 3), from);
-  assert.deepEqual(strip.slice(-3), to);
+  assert.deepEqual(strip.slice(0, 3), to);
+  assert.deepEqual(strip.slice(-3), from);
   assert.equal(strip.length, 10);
   assert.equal(n, 4);
+});
+
+test("line centers follow the payline through reel and row", () => {
+  const points = lineCenters([0, 1, 2, 1, 0], { reelWidth: 40, gap: 10, cellHeight: 30 });
+  assert.deepEqual(points, [
+    { x: 20, y: 15 },
+    { x: 70, y: 45 },
+    { x: 120, y: 75 },
+    { x: 170, y: 45 },
+    { x: 220, y: 15 },
+  ]);
+  assert.equal(polylineFromCenters(points), "20,15 70,45 120,75 170,45 220,15");
+});
+
+test("lit cells cover line paths, expanded reels, and scatter positions", () => {
+  const cells = litCells([
+    { path: [1, 1, 1, 1, 1] },
+    { reels: [0, 4] },
+    { cells: [[2, 0], [2, 2]] },
+  ]);
+  assert.ok(cells.has("0-1"));
+  assert.ok(cells.has("4-1"));
+  assert.ok(cells.has("0-0"));
+  assert.ok(cells.has("0-2"));
+  assert.ok(cells.has("4-0"));
+  assert.ok(cells.has("2-0"));
+  assert.ok(cells.has("2-2"));
 });
 
 test("spinReels returns a 5x3 grid from strips", () => {

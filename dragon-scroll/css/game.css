@@ -94,6 +94,10 @@ body {
   display: none;
 }
 
+.reels-stage {
+  position: relative;
+}
+
 .reels {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -102,6 +106,21 @@ body {
 
 .reels[hidden] {
   display: none;
+}
+
+.win-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.win-lines polyline {
+  filter: drop-shadow(0 0 6px rgba(255, 224, 138, 0.85));
+  animation: line-pulse 0.55s ease-in-out infinite alternate;
 }
 
 .reel {
@@ -141,9 +160,42 @@ body {
   object-fit: cover;
 }
 
-.symbol.is-win {
-  border-color: var(--win);
-  box-shadow: inset 0 0 0 2px var(--win);
+.reels.has-win .symbol {
+  opacity: 0.38;
+  filter: grayscale(0.2) brightness(0.75);
+}
+
+.reels.has-win .symbol.is-win {
+  opacity: 1;
+  filter: none;
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    inset 0 0 0 3px var(--win),
+    0 0 18px rgba(255, 224, 138, 0.75);
+  animation: win-flash 0.45s ease-in-out infinite alternate;
+}
+
+@keyframes win-flash {
+  from {
+    box-shadow:
+      inset 0 0 0 3px var(--win),
+      0 0 10px rgba(255, 224, 138, 0.4);
+  }
+  to {
+    box-shadow:
+      inset 0 0 0 3px #fff4c4,
+      0 0 22px rgba(255, 224, 138, 0.95);
+  }
+}
+
+@keyframes line-pulse {
+  from {
+    stroke-opacity: 0.75;
+  }
+  to {
+    stroke-opacity: 1;
+  }
 }
 
 .meters,

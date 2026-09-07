@@ -93,9 +93,9 @@ export function applyExpand(grid, symbol) {
 }
 
 export function expandingPay(grid, symbol, lines, betPerLine) {
-  const count = grid.filter((reel) => reel.includes(symbol)).length;
-  const pay = PAYS[symbol]?.[count] ?? 0;
-  return { symbol, count, amount: pay * betPerLine * lines };
+  const reels = grid.flatMap((reel, index) => (reel.includes(symbol) ? [index] : []));
+  const pay = PAYS[symbol]?.[reels.length] ?? 0;
+  return { symbol, count: reels.length, reels, amount: pay * betPerLine * lines };
 }
 
 export function evaluateFeature(grid, expandingSymbol, lines, betPerLine) {

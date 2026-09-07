@@ -1,13 +1,60 @@
 import { COPY, LINES, PAYS, SCATTER_MULT, SYMBOL_META, SYMBOLS } from "./config.js";
 
+export const LINE_COLORS = [
+  "#f5d76e",
+  "#ff5b5b",
+  "#4aa3ff",
+  "#c084fc",
+  "#3ddc97",
+  "#ff9f43",
+  "#20c9c9",
+  "#ff7eb6",
+  "#7aa2ff",
+  "#ffeaa7",
+];
+
 export function symbolTile(id, extraClass = "") {
   const meta = SYMBOL_META[id];
   return `<div class="symbol symbol-${id} ${extraClass}" data-symbol="${id}"><img src="${meta.image}" alt="${meta.name}"></div>`;
 }
 
+/** Result sits above the current view so the strip can fall top → bottom. */
 export function buildSpinStrip(fromCol, toCol, extraCount, pick) {
   const filler = Array.from({ length: extraCount }, pick);
-  return [...fromCol, ...filler, ...toCol];
+  return [...toCol, ...filler, ...fromCol];
+}
+
+export function lineCenters(path, { reelWidth, gap, cellHeight }) {
+  return path.map((row, reel) => ({
+    x: reel * (reelWidth + gap) + reelWidth / 2,
+    y: row * cellHeight + cellHeight / 2,
+  }));
+}
+
+export function polylineFromCenters(centers) {
+  return centers.map((point) => `${point.x},${point.y}`).join(" ");
+}
+
+export function litCells(highlights) {
+  const lit = new Set();
+  for (const win of highlights) {
+    win.path?.forEach((row, reel) => lit.add(`${reel}-${row}`));
+    win.reels?.forEach((reel) => {
+      for (let row = 0; row < 3; row += 1) lit.add(`${reel}-${row}`);
+    });
+    win.cells?.forEach(([reel, row]) => lit.add(`${reel}-${row}`));
+  }
+  return lit;
+}
+
+export function scatterCells(grid) {
+  const cells = [];
+  grid.forEach((col, reel) => {
+    col.forEach((id, row) => {
+      if (id === "scroll") cells.push([reel, row]);
+    });
+  });
+  return cells;
 }
 
 function ensureReels(root) {
@@ -26,9 +73,8 @@ function stripEl(root, reelIndex) {
 
 export function renderReels(root, grid, highlights = []) {
   ensureReels(root);
-  const lit = new Set(
-    highlights.flatMap((win) => win.path.map((row, reel) => `${reel}-${row}`))
-  );
+  const lit = litCells(highlights);
+  root.classList.toggle("has-win", lit.size > 0);
   grid.forEach((col, reelIndex) => {
     const strip = stripEl(root, reelIndex);
     strip.style.transition = "none";
@@ -37,6 +83,41 @@ export function renderReels(root, grid, highlights = []) {
       .map((id, row) => symbolTile(id, lit.has(`${reelIndex}-${row}`) ? "is-win" : ""))
       .join("");
   });
+  renderWinLines(root, highlights);
+}
+
+function overlayEl(root) {
+  return root.parentElement?.querySelector("[data-win-lines]") ?? null;
+}
+
+export function renderWinLines(root, highlights = []) {
+  const svg = overlayEl(root);
+  if (!svg) return;
+  const stage = svg.parentElement;
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("width", String(width));
+  svg.setAttribute("height", String(height));
+
+  const stageRect = stage.getBoundingClientRect();
+  const lines = highlights.filter((win) => Array.isArray(win.path) && win.line >= 0);
+  svg.innerHTML = lines
+    .map((win) => {
+      const centers = win.path.map((row, reel) => {
+        const cell = root.querySelector(`[data-reel="${reel}"] .symbol:nth-child(${row + 1})`);
+        if (!cell) return null;
+        const box = cell.getBoundingClientRect();
+        return {
+          x: +(box.left + box.width / 2 - stageRect.left).toFixed(1),
+          y: +(box.top + box.height / 2 - stageRect.top).toFixed(1),
+        };
+      });
+      if (centers.some((point) => !point)) return "";
+      const color = LINE_COLORS[win.line % LINE_COLORS.length];
+      return `<polyline points="${polylineFromCenters(centers)}" stroke="${color}" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
+    })
+    .join("");
 }
 
 function cellSize(root) {
@@ -57,12 +138,11 @@ export function animateReelSpin(root, fromGrid, toGrid, rng) {
       const reel = root.querySelector(`[data-reel="${reelIndex}"]`);
       const strip = stripEl(root, reelIndex);
       strip.innerHTML = sequence.map((id) => symbolTile(id)).join("");
-      strip.style.transition = "none";
-      strip.style.transform = "translate3d(0, 0, 0)";
-      reel.classList.add("is-spinning");
-
       const distance = (sequence.length - 3) * height;
       const duration = 820 + reelIndex * 260;
+      strip.style.transition = "none";
+      strip.style.transform = `translate3d(0, ${-distance}px, 0)`;
+      reel.classList.add("is-spinning");
 
       return new Promise((resolve) => {
         let settled = false;
@@ -79,7 +159,7 @@ export function animateReelSpin(root, fromGrid, toGrid, rng) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             strip.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.7, 0.16, 1)`;
-            strip.style.transform = `translate3d(0, ${-distance}px, 0)`;
+            strip.style.transform = "translate3d(0, 0, 0)";
           });
         });
 
@@ -158,8 +238,10 @@ export function paytableHtml() {
 export function showOverlay(doc, { title, body, symbol, onDone }) {
   const intro = doc.querySelector("[data-bonus-intro]");
   const reels = doc.querySelector("[data-reels]");
+  const stage = reels.closest(".reels-stage");
   intro.hidden = false;
   reels.hidden = true;
+  if (stage) stage.hidden = true;
   intro.querySelector("[data-overlay-title]").textContent = title;
   intro.querySelector("[data-overlay-body]").textContent = body;
   intro.querySelector("[data-overlay-symbol]").innerHTML = symbol
@@ -176,6 +258,7 @@ export function showOverlay(doc, { title, body, symbol, onDone }) {
     settled = true;
     intro.hidden = true;
     reels.hidden = false;
+    if (stage) stage.hidden = false;
     onDone();
   };
   intro.querySelector("[data-overlay-continue]").onclick = finish;

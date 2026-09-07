@@ -12,6 +12,7 @@ import {
   bindChrome,
   paytableHtml,
   renderReels,
+  scatterCells,
   setBusy,
   showOverlay,
   tickNumber,
@@ -31,6 +32,25 @@ const DEMO_BONUS_GRID = [
   ["jack", "lion", "ace"],
   ["queen", "phoenix", "king"],
 ];
+
+const DEMO_LINE_GRID = [
+  ["jack", "dragon", "queen"],
+  ["ace", "dragon", "king"],
+  ["coin", "dragon", "lantern"],
+  ["jack", "lion", "ace"],
+  ["queen", "phoenix", "king"],
+];
+
+function extraHighlights(grid, scatter, expandWin) {
+  const extras = [];
+  if (expandWin?.amount && expandWin.reels?.length) {
+    extras.push({ kind: "expand", reels: expandWin.reels });
+  }
+  if (scatter?.amount) {
+    extras.push({ kind: "scatter", cells: scatterCells(grid) });
+  }
+  return extras;
+}
 
 export function createGame({ doc, storage, rng = Math.random, demo = null }) {
   const session = storage.load();
@@ -74,7 +94,7 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
     renderReels(reelsEl, grid);
   }
 
-  async function presentWins(lineWins, extraAmount, beforeBalance) {
+  async function presentWins(lineWins, extraAmount, beforeBalance, extras = []) {
     const lineTotal = lineWins.reduce((sum, win) => sum + win.amount, 0);
     const total = lineTotal + extraAmount;
     if (total <= 0) {
@@ -84,14 +104,15 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
     }
     for (const win of lineWins) {
       refresh([win]);
-      await delay(700);
+      await delay(800);
     }
-    refresh(lineWins);
+    const all = [...lineWins, ...extras];
+    refresh(all);
     await tickNumber(winEl, 0, total, 450);
     state.win = total;
     state.balance = beforeBalance + total;
     persist();
-    refresh(lineWins);
+    refresh(all);
   }
 
   async function runFeature() {
@@ -113,7 +134,12 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
       const feature = evaluateFeature(grid, state.expandingSymbol, state.lines, state.betPerLine);
       state.lastGrid = feature.grid;
       const extra = feature.expandWin.amount + feature.scatter.amount;
-      await presentWins(feature.lineWins, extra, state.balance);
+      await presentWins(
+        feature.lineWins,
+        extra,
+        state.balance,
+        extraHighlights(feature.grid, feature.scatter, feature.expandWin)
+      );
       if (feature.retrigger) state.freeSpinsLeft += feature.extraSpins;
       refresh();
       await delay(350);
@@ -132,10 +158,20 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
       persist();
     }
     refresh();
-    const grid = demo === "bonus" && !free ? DEMO_BONUS_GRID : randomGrid(rng);
+    const grid =
+      demo === "bonus" && !free
+        ? DEMO_BONUS_GRID
+        : demo === "line" && !free
+          ? DEMO_LINE_GRID
+          : randomGrid(rng);
     await animateLand(grid);
     const result = evaluateBase(grid, state.lines, state.betPerLine);
-    await presentWins(result.lineWins, result.scatter.amount, state.balance);
+    await presentWins(
+      result.lineWins,
+      result.scatter.amount,
+      state.balance,
+      extraHighlights(grid, result.scatter, null)
+    );
     if (result.trigger) await runFeature();
     state.busy = false;
     refresh();
