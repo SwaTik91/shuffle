@@ -10,7 +10,10 @@
   <main class="app">
     <header class="hero">
       <p class="eyebrow" data-subtitle></p>
-      <h1 data-title></h1>
+      <h1>
+        <img src="assets/ui-logo.jpg" alt="Свиток Дракона">
+        <span class="sr-only" data-title></span>
+      </h1>
       <p class="feature" data-feature hidden></p>
     </header>
 
@@ -52,7 +55,10 @@
         <strong data-coin>1</strong>
         <button type="button" data-coin-plus aria-label="Больше ставка">+</button>
       </div>
-      <button type="button" class="spin" data-spin></button>
+      <button type="button" class="spin" data-spin>
+        <img src="assets/ui-spin.jpg" alt="">
+        <span data-spin-label></span>
+      </button>
       <button type="button" class="ghost" data-paytable-open></button>
       <button type="button" class="ghost restore" data-restore hidden></button>
     </section>

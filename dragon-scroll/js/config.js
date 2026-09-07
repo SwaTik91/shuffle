@@ -62,17 +62,26 @@ export const REEL_STRIPS = [
   strip({ dragon: 2, phoenix: 3, lion: 3, coin: 4, lantern: 4, ace: 5, king: 5, queen: 6, jack: 6, scroll: 1 }),
 ];
 
+export const ASSETS = {
+  background: "assets/ui-background.jpg",
+  logo: "assets/ui-logo.jpg",
+  machine: "assets/ui-machine.jpg",
+  spin: "assets/ui-spin.jpg",
+  bonus: "assets/ui-bonus.jpg",
+  meter: "assets/ui-meter.jpg",
+};
+
 export const SYMBOL_META = {
-  dragon: { mark: "龍", name: "Дракон" },
-  phoenix: { mark: "鳳", name: "Феникс" },
-  lion: { mark: "獅", name: "Лев" },
-  coin: { mark: "錢", name: "Монета" },
-  lantern: { mark: "燈", name: "Фонарь" },
-  ace: { mark: "A", name: "Туз" },
-  king: { mark: "K", name: "Король" },
-  queen: { mark: "Q", name: "Дама" },
-  jack: { mark: "J", name: "Валет" },
-  scroll: { mark: "卷", name: "Свиток" },
+  dragon: { mark: "龍", name: "Дракон", image: "assets/symbol-dragon.jpg" },
+  phoenix: { mark: "鳳", name: "Феникс", image: "assets/symbol-phoenix.jpg" },
+  lion: { mark: "獅", name: "Лев", image: "assets/symbol-lion.jpg" },
+  coin: { mark: "錢", name: "Монета", image: "assets/symbol-coin.jpg" },
+  lantern: { mark: "燈", name: "Фонарь", image: "assets/symbol-lantern.jpg" },
+  ace: { mark: "A", name: "Туз", image: "assets/symbol-ace.jpg" },
+  king: { mark: "K", name: "Король", image: "assets/symbol-king.jpg" },
+  queen: { mark: "Q", name: "Дама", image: "assets/symbol-queen.jpg" },
+  jack: { mark: "J", name: "Валет", image: "assets/symbol-jack.jpg" },
+  scroll: { mark: "卷", name: "Свиток", image: "assets/symbol-scroll.jpg" },
 };
 
 export const COPY = {

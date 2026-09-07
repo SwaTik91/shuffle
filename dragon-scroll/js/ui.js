@@ -2,7 +2,7 @@ import { COPY, LINES, PAYS, SCATTER_MULT, SYMBOL_META, SYMBOLS } from "./config.
 
 export function symbolTile(id, extraClass = "") {
   const meta = SYMBOL_META[id];
-  return `<div class="symbol symbol-${id} ${extraClass}" data-symbol="${id}"><span class="mark">${meta.mark}</span></div>`;
+  return `<div class="symbol symbol-${id} ${extraClass}" data-symbol="${id}"><img src="${meta.image}" alt="${meta.name}"></div>`;
 }
 
 export function renderReels(root, grid, highlights = []) {
@@ -30,7 +30,7 @@ export function bindChrome(doc) {
   doc.querySelector("[data-label-win]").textContent = COPY.win;
   doc.querySelector("[data-label-lines]").textContent = COPY.lines;
   doc.querySelector("[data-label-coin]").textContent = COPY.bet;
-  doc.querySelector("[data-spin]").textContent = COPY.spin;
+  doc.querySelector("[data-spin-label]").textContent = COPY.spin;
   doc.querySelector("[data-paytable-open]").textContent = COPY.paytable;
   doc.querySelector("[data-restore]").textContent = COPY.restore;
 }

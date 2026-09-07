@@ -18,8 +18,17 @@ body {
   font-family: "Noto Serif SC", "Songti SC", "Times New Roman", serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top, #4a1b18 0%, var(--bg) 55%),
+    linear-gradient(180deg, rgba(20, 8, 11, 0.35), rgba(20, 8, 11, 0.72)),
+    url("../assets/ui-background.jpg") center / cover no-repeat fixed,
     #14080b;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 
 .app {
@@ -33,6 +42,17 @@ body {
   margin-bottom: 12px;
 }
 
+.hero h1 {
+  margin: 6px 0 8px;
+}
+
+.hero h1 img {
+  display: block;
+  width: min(100%, 560px);
+  margin: 0 auto;
+  border: 1px solid var(--gold);
+}
+
 .eyebrow,
 .feature {
   margin: 0;
@@ -42,26 +62,25 @@ body {
   font-size: 0.75rem;
 }
 
-h1 {
-  margin: 6px 0 8px;
-  font-size: clamp(1.8rem, 6vw, 2.6rem);
-  color: var(--gold);
-}
-
 .feature {
   color: var(--win);
 }
 
 .machine {
-  padding: 12px;
+  padding: 18px 12px 12px;
   border: 2px solid var(--gold);
-  background: var(--panel);
+  background:
+    linear-gradient(rgba(20, 8, 11, 0.55), rgba(20, 8, 11, 0.72)),
+    url("../assets/ui-machine.jpg") center / cover no-repeat;
 }
 
 .bonus-intro {
   padding: 20px 12px;
   text-align: center;
-  background: #4a1b14;
+  color: #fff7e6;
+  background:
+    linear-gradient(rgba(20, 8, 11, 0.45), rgba(20, 8, 11, 0.7)),
+    url("../assets/ui-bonus.jpg") center / cover no-repeat;
   border: 2px solid var(--win);
 }
 
@@ -92,33 +111,21 @@ h1 {
 
 .symbol {
   aspect-ratio: 3 / 4;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
   border: 1px solid #6d3a2c;
-  background: linear-gradient(#3b1716, #1b0b0d);
-  color: var(--ink);
+  background: #1b0b0d;
 }
 
-.symbol .mark {
-  font-size: clamp(1.4rem, 5vw, 2rem);
-  line-height: 1;
+.symbol img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-
-.symbol-dragon { color: #ff5a4c; }
-.symbol-phoenix { color: #ffb347; }
-.symbol-lion { color: #f0d27a; }
-.symbol-coin { color: #f5d76e; }
-.symbol-lantern { color: #ff8a65; }
-.symbol-scroll { color: #9ad7ff; }
-.symbol-ace,
-.symbol-king,
-.symbol-queen,
-.symbol-jack { color: #d7c4a3; }
 
 .symbol.is-win {
   border-color: var(--win);
   box-shadow: inset 0 0 0 2px var(--win);
-  background: #5a2a14;
 }
 
 .meters,
@@ -133,8 +140,11 @@ h1 {
 .stepper {
   flex: 1 1 140px;
   padding: 10px 12px;
-  background: var(--panel);
-  border: 1px solid #6d3a2c;
+  color: #fff7e6;
+  background:
+    linear-gradient(rgba(20, 8, 11, 0.35), rgba(20, 8, 11, 0.55)),
+    url("../assets/ui-meter.jpg") center / cover no-repeat;
+  border: 1px solid var(--gold);
 }
 
 .meters span,
@@ -181,14 +191,32 @@ button:disabled {
 
 .spin {
   flex: 1 1 100%;
-  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 8px 16px;
+  background:
+    linear-gradient(rgba(122, 28, 22, 0.55), rgba(80, 16, 14, 0.7)),
+    url("../assets/ui-spin.jpg") center / cover no-repeat;
   color: #fff7e6;
   font-size: 1.2rem;
 }
 
+.spin img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+}
+
 .ghost {
   flex: 1 1 160px;
-  background: transparent;
+  background:
+    linear-gradient(rgba(20, 8, 11, 0.45), rgba(20, 8, 11, 0.65)),
+    url("../assets/ui-meter.jpg") center / cover no-repeat;
 }
 
 .overlay {
@@ -208,7 +236,9 @@ button:disabled {
 .dialog {
   width: min(520px, 100%);
   padding: 20px;
-  background: var(--panel);
+  background:
+    linear-gradient(rgba(20, 8, 11, 0.72), rgba(20, 8, 11, 0.86)),
+    url("../assets/ui-machine.jpg") center / cover no-repeat;
   border: 2px solid var(--gold);
 }
 
@@ -232,17 +262,22 @@ button:disabled {
 }
 
 .dialog .symbol {
-  width: 36px;
+  width: 40px;
   aspect-ratio: 1;
-  display: inline-grid;
+  display: inline-block;
   vertical-align: middle;
 }
 
 .overlay-symbol {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin: 12px 0;
+}
+
+.overlay-symbol .symbol {
+  width: 72px;
 }
 
 @media (min-width: 720px) {
