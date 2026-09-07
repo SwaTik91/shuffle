@@ -63,6 +63,7 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
     expandingSymbol: null,
     lastGrid: randomGrid(rng),
   };
+  let lastHighlights = [];
 
   const reelsEl = doc.querySelector("[data-reels]");
   const winEl = doc.querySelector("[data-win]");
@@ -75,8 +76,9 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
     });
   }
 
-  function refresh(highlights = []) {
-    renderReels(reelsEl, state.lastGrid, highlights);
+  function refresh(highlights) {
+    if (highlights !== undefined) lastHighlights = highlights;
+    renderReels(reelsEl, state.lastGrid, lastHighlights);
     updateMeters(doc, {
       balance: state.balance,
       totalBet: totalBet(state.lines, state.betPerLine),
@@ -99,7 +101,7 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
     const total = lineTotal + extraAmount;
     if (total <= 0) {
       state.win = 0;
-      refresh();
+      refresh([]);
       return;
     }
     for (const win of lineWins) {
@@ -141,7 +143,6 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
         extraHighlights(feature.grid, feature.scatter, feature.expandWin)
       );
       if (feature.retrigger) state.freeSpinsLeft += feature.extraSpins;
-      refresh();
       await delay(350);
     }
     state.expandingSymbol = null;
@@ -157,7 +158,7 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
       state.balance -= totalBet(state.lines, state.betPerLine);
       persist();
     }
-    refresh();
+    refresh([]);
     const grid =
       demo === "bonus" && !free
         ? DEMO_BONUS_GRID
