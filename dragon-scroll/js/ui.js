@@ -38,7 +38,9 @@ export function polylineFromCenters(centers) {
 export function litCells(highlights) {
   const lit = new Set();
   for (const win of highlights) {
-    win.path?.forEach((row, reel) => lit.add(`${reel}-${row}`));
+    win.path?.forEach((row, reel) => {
+      if (win.count == null || reel < win.count) lit.add(`${reel}-${row}`);
+    });
     win.reels?.forEach((reel) => {
       for (let row = 0; row < 3; row += 1) lit.add(`${reel}-${row}`);
     });
@@ -104,7 +106,8 @@ export function renderWinLines(root, highlights = []) {
   const lines = highlights.filter((win) => Array.isArray(win.path) && win.line >= 0);
   svg.innerHTML = lines
     .map((win) => {
-      const centers = win.path.map((row, reel) => {
+      const end = win.count > 1 ? win.count : win.path.length;
+      const centers = win.path.slice(0, end).map((row, reel) => {
         const cell = root.querySelector(`[data-reel="${reel}"] .symbol:nth-child(${row + 1})`);
         if (!cell) return null;
         const box = cell.getBoundingClientRect();
@@ -115,7 +118,7 @@ export function renderWinLines(root, highlights = []) {
       });
       if (centers.some((point) => !point)) return "";
       const color = LINE_COLORS[win.line % LINE_COLORS.length];
-      return `<polyline points="${polylineFromCenters(centers)}" stroke="${color}" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
+      return `<polyline points="${polylineFromCenters(centers)}" stroke="${color}" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
     })
     .join("");
 }

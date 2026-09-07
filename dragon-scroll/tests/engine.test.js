@@ -166,12 +166,13 @@ test("line centers follow the payline through reel and row", () => {
 
 test("lit cells cover line paths, expanded reels, and scatter positions", () => {
   const cells = litCells([
-    { path: [1, 1, 1, 1, 1] },
+    { path: [1, 1, 1, 1, 1], count: 3 },
     { reels: [0, 4] },
     { cells: [[2, 0], [2, 2]] },
   ]);
   assert.ok(cells.has("0-1"));
-  assert.ok(cells.has("4-1"));
+  assert.ok(cells.has("2-1"));
+  assert.equal(cells.has("3-1"), false);
   assert.ok(cells.has("0-0"));
   assert.ok(cells.has("0-2"));
   assert.ok(cells.has("4-0"));
