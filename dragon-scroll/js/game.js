@@ -33,6 +33,7 @@ const DEMO_BONUS_GRID = [
 
 export function createGame({ doc, storage, rng = Math.random, demo = null }) {
   const session = storage.load();
+  if (demo === "broke") session.balance = 3;
   let state = {
     ...session,
     win: 0,
@@ -98,6 +99,8 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
 
   async function runFeature() {
     state.expandingSymbol = pickExpandingSymbol(rng);
+    state.freeSpinsLeft = FREE_SPINS;
+    refresh();
     await new Promise((resolve) => {
       showOverlay(doc, {
         title: COPY.bonusTitle,
@@ -106,8 +109,6 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
         onDone: resolve,
       });
     });
-    state.freeSpinsLeft = FREE_SPINS;
-    refresh();
     while (state.freeSpinsLeft > 0) {
       state.freeSpinsLeft -= 1;
       const grid = randomGrid(rng);
@@ -175,10 +176,14 @@ export function createGame({ doc, storage, rng = Math.random, demo = null }) {
   doc.querySelector("[data-coin-plus]").addEventListener("click", () => changeBet(1));
   doc.querySelector("[data-restore]").addEventListener("click", restore);
   doc.querySelector("[data-paytable-open]").addEventListener("click", () => {
-    doc.querySelector("[data-paytable]").hidden = false;
+    const panel = doc.querySelector("[data-paytable]");
+    panel.hidden = false;
+    panel.classList.add("is-open");
   });
   doc.querySelector("[data-paytable-close]").addEventListener("click", () => {
-    doc.querySelector("[data-paytable]").hidden = true;
+    const panel = doc.querySelector("[data-paytable]");
+    panel.hidden = true;
+    panel.classList.remove("is-open");
   });
   refresh();
   return { spin, restore, getState: () => ({ ...state }) };

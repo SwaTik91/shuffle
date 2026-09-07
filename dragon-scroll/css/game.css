@@ -58,10 +58,31 @@ h1 {
   background: var(--panel);
 }
 
+.bonus-intro {
+  padding: 20px 12px;
+  text-align: center;
+  background: #4a1b14;
+  border: 2px solid var(--win);
+}
+
+.bonus-intro h2 {
+  margin: 0 0 8px;
+  color: var(--win);
+  font-size: 1.8rem;
+}
+
+.bonus-intro[hidden] {
+  display: none;
+}
+
 .reels {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
+}
+
+.reels[hidden] {
+  display: none;
 }
 
 .reel {
@@ -130,12 +151,17 @@ h1 {
 
 .stepper {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
 
 .stepper span {
   flex: 1 0 100%;
+}
+
+.stepper button {
+  min-width: 44px;
 }
 
 button {
@@ -168,14 +194,15 @@ button:disabled {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 4, 6, 0.78);
-  display: grid;
+  z-index: 30;
+  background: rgba(10, 4, 6, 0.86);
+  display: none;
   place-items: center;
   padding: 16px;
 }
 
-.overlay[hidden] {
-  display: none;
+.overlay.is-open {
+  display: grid;
 }
 
 .dialog {

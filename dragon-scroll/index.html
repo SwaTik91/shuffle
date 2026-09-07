@@ -16,6 +16,12 @@
 
     <section class="machine" aria-label="Барабаны">
       <div class="reels" data-reels></div>
+      <div class="bonus-intro" data-bonus-intro hidden>
+        <h2 data-overlay-title></h2>
+        <p data-overlay-body></p>
+        <div class="overlay-symbol" data-overlay-symbol></div>
+        <button type="button" data-overlay-continue></button>
+      </div>
     </section>
 
     <section class="meters">
@@ -51,15 +57,6 @@
       <button type="button" class="ghost restore" data-restore hidden></button>
     </section>
   </main>
-
-  <div class="overlay" data-overlay hidden>
-    <div class="dialog">
-      <h2 data-overlay-title></h2>
-      <p data-overlay-body></p>
-      <div class="overlay-symbol" data-overlay-symbol></div>
-      <button type="button" data-overlay-continue></button>
-    </div>
-  </div>
 
   <div class="overlay" data-paytable hidden>
     <div class="dialog wide">

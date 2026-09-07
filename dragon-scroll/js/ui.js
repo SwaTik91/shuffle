@@ -81,23 +81,30 @@ export function paytableHtml() {
 }
 
 export function showOverlay(doc, { title, body, symbol, onDone }) {
-  const overlay = doc.querySelector("[data-overlay]");
-  overlay.hidden = false;
-  overlay.querySelector("[data-overlay-title]").textContent = title;
-  overlay.querySelector("[data-overlay-body]").textContent = body;
-  overlay.querySelector("[data-overlay-symbol]").innerHTML = symbol
+  const intro = doc.querySelector("[data-bonus-intro]");
+  const reels = doc.querySelector("[data-reels]");
+  intro.hidden = false;
+  reels.hidden = true;
+  intro.querySelector("[data-overlay-title]").textContent = title;
+  intro.querySelector("[data-overlay-body]").textContent = body;
+  intro.querySelector("[data-overlay-symbol]").innerHTML = symbol
     ? `${COPY.expanding}: ${symbolTile(symbol)} <span>${SYMBOL_META[symbol].name}</span>`
     : "";
-  overlay.querySelector("[data-overlay-continue]").textContent = COPY.continue;
+  intro.querySelector("[data-overlay-continue]").textContent = COPY.continue;
   let settled = false;
+  let armed = false;
+  window.setTimeout(() => {
+    armed = true;
+  }, 700);
   const finish = () => {
-    if (settled) return;
+    if (!armed || settled) return;
     settled = true;
-    overlay.hidden = true;
+    intro.hidden = true;
+    reels.hidden = false;
     onDone();
   };
-  overlay.querySelector("[data-overlay-continue]").onclick = finish;
-  window.setTimeout(finish, 2000);
+  intro.querySelector("[data-overlay-continue]").onclick = finish;
+  window.setTimeout(finish, 4500);
 }
 
 export function tickNumber(el, from, to, ms = 500) {
