@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Свиток Дракона</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow" data-subtitle></p>
+      <h1 data-title></h1>
+      <p class="feature" data-feature hidden></p>
+    </header>
+
+    <section class="machine" aria-label="Барабаны">
+      <div class="reels" data-reels></div>
+    </section>
+
+    <section class="meters">
+      <div>
+        <span data-label-balance></span>
+        <strong data-balance>0</strong>
+      </div>
+      <div>
+        <span data-label-bet></span>
+        <strong data-total-bet>0</strong>
+      </div>
+      <div>
+        <span data-label-win></span>
+        <strong data-win>0</strong>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="stepper">
+        <span data-label-lines></span>
+        <button type="button" data-lines-minus aria-label="Меньше линий">−</button>
+        <strong data-lines>10</strong>
+        <button type="button" data-lines-plus aria-label="Больше линий">+</button>
+      </div>
+      <div class="stepper">
+        <span data-label-coin></span>
+        <button type="button" data-coin-minus aria-label="Меньше ставка">−</button>
+        <strong data-coin>1</strong>
+        <button type="button" data-coin-plus aria-label="Больше ставка">+</button>
+      </div>
+      <button type="button" class="spin" data-spin></button>
+      <button type="button" class="ghost" data-paytable-open></button>
+      <button type="button" class="ghost restore" data-restore hidden></button>
+    </section>
+  </main>
+
+  <div class="overlay" data-overlay hidden>
+    <div class="dialog">
+      <h2 data-overlay-title></h2>
+      <p data-overlay-body></p>
+      <div class="overlay-symbol" data-overlay-symbol></div>
+      <button type="button" data-overlay-continue></button>
+    </div>
+  </div>
+
+  <div class="overlay" data-paytable hidden>
+    <div class="dialog wide">
+      <div data-paytable-body></div>
+      <button type="button" data-paytable-close>Закрыть</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

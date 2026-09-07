@@ -4,7 +4,7 @@ type: feat
 date: 2026-09-07
 topic: chinese-book-slot
 artifact_contract: ce-unified-plan/v1
-artifact_readiness: requirements-only
+artifact_readiness: implementation-ready
 product_contract_source: ce-brainstorm
 execution: code
 ---
@@ -15,7 +15,10 @@ execution: code
 
 - **Objective:** Ship a first playable browser slot, Dragon Scroll, that a single player can spin on desktop and phone with fake credits and a complete Book of Ra-style loop.
 - **Product authority:** This plan owns only that game. The existing TON raffle in `SwaTik91/shuffle` is a different product and is not in scope.
-- **Open blockers:** None. Remaining choices are deferred to planning.
+- **Open blockers:** None.
+- **Execution profile:** New static browser project under `dragon-scroll/`. Vanilla HTML, CSS, and ES modules. No bundler. Game logic is importable from Node for tests.
+- **Stop conditions:** Do not edit raffle files (`index.html`, `script.js`, `style.css`, `.github/workflows/static.yml`). Do not add sound, gamble, autoplay, or third-party slot assets.
+- **Tail ownership:** Implementer verifies `node --test` and a manual browser spin before calling the unit done.
 
 ---
 
@@ -197,14 +200,108 @@ flowchart TB
 
 ### Outstanding Questions
 
-**Deferred to Planning**
-
-- Exact per-symbol pay values and the 10 line maps.
-- Final original title if Dragon Scroll is replaced.
-- New repository name and hosting for the game project.
-- How win-line highlight is sequenced when several lines pay at once.
+Resolved in the Planning Contract. No items remain before implementation.
 
 ### Sources / Research
 
 - Book of Ra deluxe public spec: 5-reel, 10-line video slot; book as substitute and 3+ scatter trigger; 10 free games; one special expanding symbol for the feature. Used as a mechanical pattern only.
 - Lucky Lady’s Charm and Sizzling Hot were considered and rejected as the v1 template.
+
+---
+
+## Planning Contract
+
+### Key Technical Decisions
+
+- KTD1. **Standalone folder, not a second GitHub repo in this pass.** `gh` cannot create repos from this agent. Ship a self-contained game in `dragon-scroll/` so raffle files stay untouched. A later extract to its own repo is mechanical. Governs R16.
+- KTD2. **Vanilla ES modules, no bundler.** Matches a static Pages host and keeps Node tests able to import the same engine. Governs R12.
+- KTD3. **Paytable and 10-line map live in `dragon-scroll/js/config.js`.** Highs pay from two-of-a-kind; lows from three; Scroll scatter pays 2 / 20 / 200 × total bet for 3 / 4 / 5. Values are original, Book of Ra-shaped, not copied from a published sheet. Governs R4, R5, R11.
+- KTD4. **Expanding symbol pays by reel count × every active line.** After expand, do not also pay that symbol via left-to-right adjacency. Other symbols still use R5 on the expanded grid. Scroll still wilds for those other symbols and still scatters. Governs R8.
+- KTD5. **Several line wins highlight in sequence, about 700ms each, then the combined total ticks on the win counter.** Governs R9.
+- KTD6. **Title stays Dragon Scroll / «Свиток Дракона».** Original name, Russian chrome. Governs R13, R14.
+
+### High-Level Technical Design
+
+Pure functions in `engine.js` own spin, line eval, scatter, expand, and feature trigger. `game.js` owns the idle → spin → present → bonus state machine. `ui.js` owns DOM. `storage.js` owns `localStorage` key `dragon-scroll-v1`.
+
+```mermaid
+flowchart TB
+  ui[ui.js] --> game[game.js]
+  game --> engine[engine.js]
+  game --> storage[storage.js]
+  engine --> config[config.js]
+  tests[engine.test.js] --> engine
+```
+
+### Implementation constraints
+
+- Player-facing strings are Russian only.
+- No Novomatic, Book of Ra, or Greentube strings in source or UI.
+- No audio APIs.
+- Raffle paths listed in the Goal Capsule stay unchanged.
+
+### Sequencing
+
+U1 config and engine with Node tests, then U2 persistence, then U3 shell and presentation, then U4 wire-up and browser check.
+
+---
+
+## Implementation Units
+
+### U1. Engine and paytable
+
+- **Goal:** Deterministic evaluation of base wins, scatters, expand pays, and feature triggers.
+- **Requirements:** R3, R5, R6, R7, R8
+- **Files:** `dragon-scroll/js/config.js`, `dragon-scroll/js/engine.js`, `dragon-scroll/tests/engine.test.js`, `dragon-scroll/package.json`
+- **Approach:** Config holds symbol ids, original pays, 10 line paths, bet steps `[1, 2, 5, 10]`, reel strips. Engine exposes `spinReels(rng)`, `evaluateBase(grid, lines, betPerLine)`, `evaluateFeature(grid, expandingSymbol, lines, betPerLine)`, `pickExpandingSymbol(rng)`, `shouldTriggerFeature(scatterCount)`.
+- **Test scenarios:** AE1-style three-of-a-kind on line 1; AE2 inactive line pays 0; three Scrolls trigger; expanding Dragon on reels 1/3/5 pays 3-kind × active lines without adjacency; wild Scroll completes a left-to-right high; five Scrolls add scatter on total bet.
+- **Verification:** `node --test dragon-scroll/tests/engine.test.js`
+- **Dependencies:** none
+
+### U2. Session persistence
+
+- **Goal:** Balance, lines, and bet-per-line survive refresh; restore to 1000 when broke.
+- **Requirements:** R1, R2, R15
+- **Files:** `dragon-scroll/js/storage.js`, `dragon-scroll/tests/storage.test.js`
+- **Approach:** Load/save a JSON blob. Clamp lines to 1–10 and bet to the denomination set. Missing or broken storage returns defaults (1000, 10, 1).
+- **Test scenarios:** AE6 round-trip; corrupt JSON falls back to defaults; restore writes 1000.
+- **Verification:** `node --test dragon-scroll/tests/storage.test.js`
+- **Dependencies:** U1 config constants only
+
+### U3. Shell, theme, and machine presentation
+
+- **Goal:** Playable Russian UI on phone and desktop with line highlight, win counter, paytable, and bonus intro.
+- **Requirements:** R9, R10, R11, R12, R13, R14
+- **Files:** `dragon-scroll/index.html`, `dragon-scroll/css/game.css`, `dragon-scroll/js/ui.js`, `dragon-scroll/README.md`
+- **Approach:** One column: title, 5×3 reels, status (balance, total bet, last win), controls (lines, bet, Spin, paytable, restore). Overlay for bonus intro that auto-continues after ~2s or on tap. Symbols are original CSS tiles with emoji marks, not licensed art.
+- **Test scenarios:** Phone-width layout keeps Spin and reels usable; paytable lists every symbol and the feature rules; overlay shows the expanding symbol.
+- **Verification:** Manual browser pass at ~390px and ~1280px plus the U4 wired flow.
+- **Dependencies:** U1, U2
+
+### U4. Game loop
+
+- **Goal:** F1–F3: deduct, spin, present, feature, persist.
+- **Requirements:** R1, R2, R4, R6–R10, R15
+- **Files:** `dragon-scroll/js/game.js`
+- **Approach:** Idle disables Spin when `balance < lines * bet`. Paid spin deducts first, animates, evaluates, sequences highlights, ticks the win counter, credits balance, then either idles or runs F3 (intro → pick → 10 locked-bet free spins, retrigger +10). Persist after every settled spin.
+- **Test scenarios:** AE3 and AE5 in the browser; a forced-feature debug hook is not required if engine tests cover trigger math.
+- **Verification:** `node --test` still green; browser: paid spin, restore path, and at least one feature (seeded or natural).
+- **Dependencies:** U1, U2, U3
+
+---
+
+## Verification Contract
+
+- Engine and storage: `node --test dragon-scroll/tests/engine.test.js dragon-scroll/tests/storage.test.js`
+- Browser: open `dragon-scroll/index.html` (or a static server), spin, change lines/bet, open paytable, exhaust credits and restore, reload and confirm session.
+- Raffle regression: `index.html`, `script.js`, and `style.css` have no diff.
+
+---
+
+## Definition of Done
+
+- All U1–U4 verification commands and browser checks pass.
+- Product Contract R1–R16 are visible in the running game or explicitly out of this repo only as R16 (raffle unchanged).
+- No abandoned prototype files remain under `dragon-scroll/`.
+- README tells a player how to open the game locally.
+
