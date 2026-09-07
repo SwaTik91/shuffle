@@ -1,4 +1,4 @@
-import { COPY, LINES, PAYS, SCATTER_MULT, SYMBOL_META, SYMBOLS } from "./config.js";
+import { COPY, LINES, PAYS, SCATTER_MULT, SCROLL, SYMBOL_META, SYMBOLS } from "./config.js";
 
 export const LINE_COLORS = [
   "#f5d76e",
@@ -53,7 +53,7 @@ export function scatterCells(grid) {
   const cells = [];
   grid.forEach((col, reel) => {
     col.forEach((id, row) => {
-      if (id === "scroll") cells.push([reel, row]);
+      if (id === SCROLL) cells.push([reel, row]);
     });
   });
   return cells;
@@ -222,7 +222,7 @@ export function setBusy(doc, busy, canAfford) {
 }
 
 export function paytableHtml() {
-  const rows = SYMBOLS.filter((id) => id !== "scroll")
+  const rows = SYMBOLS.filter((id) => id !== SCROLL)
     .map((id) => {
       const pays = PAYS[id];
       const cells = [5, 4, 3, 2]

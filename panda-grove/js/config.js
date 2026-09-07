@@ -4,29 +4,29 @@ export const DEFAULT_LINES = 10;
 export const DEFAULT_BET = 1;
 export const MIN_LINES = 1;
 export const MAX_LINES = 10;
-export const STORAGE_KEY = "dragon-scroll-v1";
+export const STORAGE_KEY = "panda-grove-v1";
 export const FREE_SPINS = 10;
-export const SCROLL = "scroll";
+export const SCROLL = "fan";
 
 export const SYMBOLS = [
-  "dragon",
-  "phoenix",
-  "lion",
+  "panda",
+  "bamboo",
+  "peach",
   "coin",
   "lantern",
   "ace",
   "king",
   "queen",
   "jack",
-  "scroll",
+  "fan",
 ];
 
 export const REGULAR_SYMBOLS = SYMBOLS.filter((id) => id !== SCROLL);
 
 export const PAYS = {
-  dragon: { 2: 10, 3: 100, 4: 1000, 5: 5000 },
-  phoenix: { 2: 5, 3: 40, 4: 400, 5: 2000 },
-  lion: { 2: 5, 3: 30, 4: 200, 5: 1000 },
+  panda: { 2: 10, 3: 100, 4: 1000, 5: 5000 },
+  bamboo: { 2: 5, 3: 40, 4: 400, 5: 2000 },
+  peach: { 2: 5, 3: 30, 4: 200, 5: 1000 },
   coin: { 3: 20, 4: 80, 5: 400 },
   lantern: { 3: 15, 4: 50, 5: 200 },
   ace: { 3: 10, 4: 40, 5: 120 },
@@ -37,7 +37,6 @@ export const PAYS = {
 
 export const SCATTER_MULT = { 3: 2, 4: 20, 5: 200 };
 
-/** Target long-run return at 10 lines. Tuned by scripts/simulate-rtp.mjs */
 export const TARGET_RTP = 0.95;
 export const TARGET_RTP_RANGE = { min: 0.94, max: 0.96 };
 
@@ -54,10 +53,6 @@ export const LINES = [
   [0, 1, 1, 1, 0],
 ];
 
-/**
- * Place rarer symbols first with even spacing so a virtual reel
- * behaves like a physical strip, not a clump of identical tiles.
- */
 export function buildStrip(counts) {
   const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
   const strip = Array(total).fill(null);
@@ -75,19 +70,14 @@ export function buildStrip(counts) {
   return strip;
 }
 
-/**
- * Virtual reels. Weights are chosen so a 10-line Monte Carlo lands
- * near 95% RTP (see scripts/simulate-rtp.mjs). Highs and scrolls are rare;
- * lows fill the rest. Do not copy a commercial cabinet's strips.
- */
 const LOW_FILL = { coin: 4, lantern: 6, ace: 5, king: 6, queen: 6, jack: 6 };
 
 export const REEL_STRIPS = [
-  buildStrip({ dragon: 1, phoenix: 1, lion: 2, ...LOW_FILL, scroll: 1 }),
-  buildStrip({ dragon: 1, phoenix: 2, lion: 1, ...LOW_FILL, scroll: 1 }),
-  buildStrip({ dragon: 1, phoenix: 1, lion: 1, ...LOW_FILL, scroll: 1 }),
-  buildStrip({ dragon: 1, phoenix: 1, lion: 1, ...LOW_FILL, scroll: 1 }),
-  buildStrip({ dragon: 1, phoenix: 1, lion: 1, ...LOW_FILL, scroll: 1 }),
+  buildStrip({ panda: 1, bamboo: 1, peach: 2, ...LOW_FILL, fan: 1 }),
+  buildStrip({ panda: 1, bamboo: 2, peach: 1, ...LOW_FILL, fan: 1 }),
+  buildStrip({ panda: 1, bamboo: 1, peach: 1, ...LOW_FILL, fan: 1 }),
+  buildStrip({ panda: 1, bamboo: 1, peach: 1, ...LOW_FILL, fan: 1 }),
+  buildStrip({ panda: 1, bamboo: 1, peach: 1, ...LOW_FILL, fan: 1 }),
 ];
 
 export const ASSETS = {
@@ -100,23 +90,23 @@ export const ASSETS = {
 };
 
 export const SYMBOL_META = {
-  dragon: { mark: "龍", name: "Дракон", image: "assets/symbol-dragon.jpg" },
-  phoenix: { mark: "鳳", name: "Феникс", image: "assets/symbol-phoenix.jpg" },
-  lion: { mark: "獅", name: "Лев", image: "assets/symbol-lion.jpg" },
+  panda: { mark: "熊", name: "Панда", image: "assets/symbol-panda.jpg" },
+  bamboo: { mark: "竹", name: "Бамбук", image: "assets/symbol-bamboo.jpg" },
+  peach: { mark: "桃", name: "Персик", image: "assets/symbol-peach.jpg" },
   coin: { mark: "錢", name: "Монета", image: "assets/symbol-coin.jpg" },
   lantern: { mark: "燈", name: "Фонарь", image: "assets/symbol-lantern.jpg" },
   ace: { mark: "A", name: "Туз", image: "assets/symbol-ace.jpg" },
   king: { mark: "K", name: "Король", image: "assets/symbol-king.jpg" },
   queen: { mark: "Q", name: "Дама", image: "assets/symbol-queen.jpg" },
   jack: { mark: "J", name: "Валет", image: "assets/symbol-jack.jpg" },
-  scroll: { mark: "卷", name: "Свиток", image: "assets/symbol-scroll.jpg" },
+  fan: { mark: "扇", name: "Веер", image: "assets/symbol-fan.jpg" },
 };
 
 export const COPY = {
-  title: "Свиток Дракона",
+  title: "Роща Панды",
   subtitle: "Песочница · фейковые кредиты",
-  sister: "Роща Панды",
-  sisterHref: "../panda-grove/",
+  sister: "Свиток Дракона",
+  sisterHref: "../dragon-scroll/",
   balance: "Баланс",
   totalBet: "Ставка",
   lines: "Линии",
@@ -129,9 +119,9 @@ export const COPY = {
   expanding: "Расширяющийся символ",
   continue: "Нажмите, чтобы продолжить",
   bonusTitle: "10 фриспинов",
-  bonusBody: "Свитки открыли бонус. Этот символ будет расширяться.",
+  bonusBody: "Веера открыли бонус. Этот символ будет расширяться.",
   paytableRules:
-    "Выигрыши слева направо по активным линиям. Свиток заменяет любой символ на линии и считает скаттером: 3 и больше в любом месте дают 10 фриспинов. Во фриспинах выбранный символ расширяет барабан и платит по числу таких барабанов на все активные линии.",
+    "Выигрыши слева направо по активным линиям. Веер заменяет любой символ на линии и считает скаттером: 3 и больше в любом месте дают 10 фриспинов. Во фриспинах выбранный символ расширяет барабан и платит по числу таких барабанов на все активные линии.",
   scatterLabel: "Скаттер (к общей ставке)",
   rtpLabel: "Теоретический возврат",
   rtpBody:
