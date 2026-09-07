@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/engine.test.js tests/storage.test.js"
+    "test": "node --test tests/engine.test.js tests/storage.test.js tests/rng.test.js tests/rtp.test.js",
+    "rtp": "node scripts/simulate-rtp.mjs"
   }
 }

@@ -37,6 +37,10 @@ export const PAYS = {
 
 export const SCATTER_MULT = { 3: 2, 4: 20, 5: 200 };
 
+/** Target long-run return at 10 lines. Tuned by scripts/simulate-rtp.mjs */
+export const TARGET_RTP = 0.95;
+export const TARGET_RTP_RANGE = { min: 0.94, max: 0.96 };
+
 export const LINES = [
   [1, 1, 1, 1, 1],
   [0, 0, 0, 0, 0],
@@ -50,16 +54,40 @@ export const LINES = [
   [0, 1, 1, 1, 0],
 ];
 
-function strip(counts) {
-  return Object.entries(counts).flatMap(([id, n]) => Array(n).fill(id));
+/**
+ * Place rarer symbols first with even spacing so a virtual reel
+ * behaves like a physical strip, not a clump of identical tiles.
+ */
+export function buildStrip(counts) {
+  const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+  const strip = Array(total).fill(null);
+  const entries = Object.entries(counts)
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => a[1] - b[1] || a[0].localeCompare(b[0]));
+  for (const [id, n] of entries) {
+    const empties = [];
+    for (let i = 0; i < total; i += 1) if (strip[i] === null) empties.push(i);
+    for (let k = 0; k < n; k += 1) {
+      const slot = Math.floor(((k + 0.5) * empties.length) / n);
+      strip[empties[slot]] = id;
+    }
+  }
+  return strip;
 }
 
+/**
+ * Virtual reels. Weights are chosen so a 10-line Monte Carlo lands
+ * near 95% RTP (see scripts/simulate-rtp.mjs). Highs and scrolls are rare;
+ * lows fill the rest. Do not copy a commercial cabinet's strips.
+ */
+const LOW_FILL = { coin: 4, lantern: 6, ace: 5, king: 6, queen: 6, jack: 6 };
+
 export const REEL_STRIPS = [
-  strip({ dragon: 2, phoenix: 3, lion: 3, coin: 4, lantern: 4, ace: 5, king: 5, queen: 6, jack: 6, scroll: 3 }),
-  strip({ dragon: 2, phoenix: 3, lion: 3, coin: 4, lantern: 4, ace: 5, king: 5, queen: 6, jack: 6, scroll: 2 }),
-  strip({ dragon: 2, phoenix: 3, lion: 3, coin: 4, lantern: 4, ace: 5, king: 5, queen: 6, jack: 6, scroll: 2 }),
-  strip({ dragon: 2, phoenix: 3, lion: 3, coin: 4, lantern: 4, ace: 5, king: 5, queen: 6, jack: 6, scroll: 2 }),
-  strip({ dragon: 2, phoenix: 3, lion: 3, coin: 4, lantern: 4, ace: 5, king: 5, queen: 6, jack: 6, scroll: 1 }),
+  buildStrip({ dragon: 1, phoenix: 1, lion: 2, ...LOW_FILL, scroll: 1 }),
+  buildStrip({ dragon: 1, phoenix: 2, lion: 1, ...LOW_FILL, scroll: 1 }),
+  buildStrip({ dragon: 1, phoenix: 1, lion: 1, ...LOW_FILL, scroll: 1 }),
+  buildStrip({ dragon: 1, phoenix: 1, lion: 1, ...LOW_FILL, scroll: 1 }),
+  buildStrip({ dragon: 1, phoenix: 1, lion: 1, ...LOW_FILL, scroll: 1 }),
 ];
 
 export const ASSETS = {
@@ -103,4 +131,7 @@ export const COPY = {
   paytableRules:
     "Выигрыши слева направо по активным линиям. Свиток заменяет любой символ на линии и считает скаттером: 3 и больше в любом месте дают 10 фриспинов. Во фриспинах выбранный символ расширяет барабан и платит по числу таких барабанов на все активные линии.",
   scatterLabel: "Скаттер (к общей ставке)",
+  rtpLabel: "Теоретический возврат",
+  rtpBody:
+    "Около 95% при 10 линиях на длинной дистанции. Каждый спин независим: результат фиксируется в момент нажатия, барабаны только показывают его.",
 };

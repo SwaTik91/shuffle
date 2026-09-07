@@ -151,6 +151,7 @@ export function paytableHtml() {
       <tbody>${rows}</tbody>
     </table>
     <p><strong>${COPY.scatterLabel}:</strong> 3×${SCATTER_MULT[3]}, 4×${SCATTER_MULT[4]}, 5×${SCATTER_MULT[5]}</p>
+    <p><strong>${COPY.rtpLabel}:</strong> ${COPY.rtpBody}</p>
   `;
 }
 
